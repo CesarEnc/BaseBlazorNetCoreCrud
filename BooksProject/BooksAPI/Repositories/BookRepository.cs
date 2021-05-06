@@ -6,6 +6,7 @@ using BooksAPI.Models;
 
 namespace BooksAPI.Repositories
 {
+    /// <summary> Book Service used to comunicate with data-layer. </summary>
     public class BookRepository : IBookRepository
     {
         public Task Add(Book entity)
@@ -13,7 +14,7 @@ namespace BooksAPI.Repositories
             throw new NotImplementedException();
         }
 
-        public Task Delete(int id)
+        public Task<bool> Delete(int id)
         {
             throw new NotImplementedException();
         }
@@ -28,7 +29,7 @@ namespace BooksAPI.Repositories
             throw new NotImplementedException();
         }
 
-        public Task Update(Book entity)
+        public Task Update(int id, Book entity)
         {
             throw new NotImplementedException();
         }
