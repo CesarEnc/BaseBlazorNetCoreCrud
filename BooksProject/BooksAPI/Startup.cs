@@ -27,7 +27,7 @@ namespace BooksAPI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            services.AddSingleton<IBookRepository, MockBookRepository>();
+            services.AddSingleton<IBookRepository, BookRepository>();
             services.AddSwaggerGen();
         }
 
