@@ -15,7 +15,8 @@
       "launchUrl": "https://localhost:44375/swagger/index.html",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "MockDataFile": "TestData.json"
+        "MockDataFile": "TestData.json",
+        "BaseDataPoint": "https://fakerestapi.azurewebsites.net/api/v1/"
       }
     },
     "BooksAPI": {

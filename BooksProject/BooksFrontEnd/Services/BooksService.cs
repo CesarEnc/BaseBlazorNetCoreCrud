@@ -31,15 +31,15 @@ namespace BooksFrontEnd.Services
 
         public async Task<IEnumerable<Book>> GetAll()
         {
-            string test = $"{_baseUri}Books/";
-            var result = await _client.GetStringAsync(test);
+            string url = $"{_baseUri}Books/";
+            var result = await _client.GetStringAsync(url);
             return JsonConvert.DeserializeObject<List<Book>>(result);
         }
 
         public async Task<Book> GetById(int id)
         {
-            string test = $"{_baseUri}Books/{id}";
-            var result = await _client.GetStringAsync(test);
+            string url = $"{_baseUri}Books/{id}";
+            var result = await _client.GetStringAsync(url);
             return JsonConvert.DeserializeObject<Book>(result);
         }
 
