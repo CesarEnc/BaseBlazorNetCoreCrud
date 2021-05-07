@@ -1,8 +1,8 @@
 ﻿@page "/Books"
 
 @using BooksFrontEnd.Services
-@using Models 
-@using Modals
+@using Models
+@using BooksFrontEnd.Modals
 @inject BooksService BookService
 
 <style>
@@ -13,11 +13,75 @@
 <h1>List of Books</h1>
 
 
-        <p>This component demonstrates fetching data from a service.</p>
-        <button type="button" class="btn btn-success" style="justify-content: center;align-items:center;">Create new Book</button>
+<p>This component demonstrates fetching data from a service.</p>
 
 
+@if (ShowUpdateForm || ShowCreateForm )
+{
+<form>
+    <table class="form-group">
+        <tr>
+            <td>
+                <label for="Name" class="control-label">Title</label>
+            </td>
+            <td>
+                <input type="text" class="form-control" @bind-value="@_currentBook.title" />
+            </td>
+            <td width="20"> </td>
+            <td>
+                <label for="Name" class="control-label">Description</label>
+            </td>
+            <td>
+                <input type="text" class="form-control" @bind-value="@_currentBook.description" />
+            </td>
+        </tr>
+        <tr>
 
+            <td>
+                <label for="Department" class="control-label">Page Count</label>
+            </td>
+            <td>
+                <input type="text" class="form-control" @bind-value="@_currentBook.pageCount" />
+            </td>
+            <td width="20"> </td>
+            <td>
+                <label for="Department" class="control-label">Excerpt</label>
+            </td>
+            <td>
+                <input type="text" class="form-control" @bind-value="@_currentBook.excerpt" />
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label for="Department" class="control-label">Publish Date</label>
+            </td>
+            <td>
+                <input type="date" class="form-control" @bind-value="@_currentBook.publishDate" />
+            </td>
+        </tr>
+        <tr>
+            <td>
+                @if (ShowUpdateForm)
+                {
+                    <input type="submit" class="btn btn-success" @onclick="async () => await BookService.Update(_currentBook.id,_currentBook)" style="width:220px;" value="Save" />
+
+                }
+                else
+                {
+                    <input type="submit" class="btn btn-success" @onclick="async () => await BookService.Add(_currentBook)" style="width:220px;" value="Save" />
+
+                }
+            </td>
+            <td></td>
+            <td width="20"> </td>
+            <td>
+                <input type="submit" class="btn btn-danger" @onclick="CloseUpdateForm" style="width:220px;" value="Cancel" />
+            </td>
+        </tr>
+    </table>
+</form>
+}
+<button type="button" class="btn btn-success" @onclick="OpenCreateForm" style="justify-content: center;align-items:center;">Create new Book</button>
 @if (books == null)
 {
     <p><em>Loading...</em></p>
@@ -43,7 +107,7 @@ else
                     <td>@book.title</td>
                     <td>@book.pageCount </td>
                     <td>
-                        <button type="button" class="btn btn-info">Update</button>
+                        <button type="button" class="btn btn-info" @onclick="() => OpenUpdateForm(book)">Update</button>
                         <button type="button" class="btn btn-danger" @onclick="() => OpenDeleteDialog(book)">Delete</button>
                     </td>
                 </tr>
@@ -69,9 +133,40 @@ else
     {
         books = await BookService.GetAll();
     }
+    public bool ShowUpdateForm { get; set; }
+
+    public bool ShowCreateForm { get; set; }
 
     public bool ShowDeleteDialog { get; set; }
+
     public bool ShowSucessDialog { get; set; }
+
+    public void OpenCreateForm()
+    {
+        _currentBook = new Book();
+        ShowCreateForm = true;
+        StateHasChanged();
+    }
+
+    public void CloseCreateForm()
+    {
+        ShowCreateForm = false;
+        StateHasChanged();
+    }
+
+    private void CloseUpdateForm()
+    {
+        ShowUpdateForm = false;
+        StateHasChanged();
+    }
+
+    private void OpenUpdateForm(Book book)
+    {
+        _currentBook = book;
+        ShowUpdateForm = true;
+        StateHasChanged();
+    }
+
     private void OpenSucessDialog()
     {
         ShowSucessDialog = true;
