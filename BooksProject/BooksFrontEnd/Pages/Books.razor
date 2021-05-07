@@ -1,0 +1,210 @@
+﻿@page "/Books"
+
+@using BooksFrontEnd.Services
+@using Models
+@using BooksFrontEnd.Modals
+@inject BooksService BookService
+
+<style>
+    tbody tr:hover {
+        background-color: lavender;
+    }
+</style>
+<h1>List of Books</h1>
+
+
+<p>This component demonstrates fetching data from a service.</p>
+
+@if (ShowUpdateForm || ShowCreateForm)
+{
+    <form>
+        <table class="form-group">
+            <tr>
+                <td>
+                    <label for="Name" class="control-label">Title</label>
+                </td>
+                <td>
+                    <input type="text" class="form-control" @bind-value="@_currentBook.title" />
+                </td>
+                <td width="20"> </td>
+                <td>
+                    <label for="Name" class="control-label">Description</label>
+                </td>
+                <td>
+                    <input type="text" class="form-control" @bind-value="@_currentBook.description" />
+                </td>
+            </tr>
+            <tr>
+
+                <td>
+                    <label for="Department" class="control-label">Page Count</label>
+                </td>
+                <td>
+                    <input type="text" class="form-control" @bind-value="@_currentBook.pageCount" />
+                </td>
+                <td width="20"> </td>
+                <td>
+                    <label for="Department" class="control-label">Excerpt</label>
+                </td>
+                <td>
+                    <input type="text" class="form-control" @bind-value="@_currentBook.excerpt" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="Department" class="control-label">Publish Date</label>
+                </td>
+                <td>
+                    <input type="date" class="form-control" @bind-value="@_currentBook.publishDate" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    @if (ShowUpdateForm)
+                    {
+                        <input type="submit" class="btn btn-success" @onclick="async () => await BookService.Update(_currentBook.id,_currentBook)" style="width:220px;" value="Save" />
+
+                    }
+                    else
+                    {
+                        <input type="submit" class="btn btn-success" @onclick="async () => await BookService.Add(_currentBook)" style="width:220px;" value="Save" />
+
+                    }
+                </td>
+                <td></td>
+                <td width="20"> </td>
+                <td>
+                    <input type="submit" class="btn btn-danger" @onclick="CloseUpdateForm" style="width:220px;" value="Cancel" />
+                </td>
+            </tr>
+        </table>
+    </form>
+}
+@if (books == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (!ShowUpdateForm && !ShowCreateForm)
+{
+    <input @bind-value="@SearchValue" @bind-value:event="oninput" />
+    <button type="button" class="btn btn-success" @onclick="OpenCreateForm" style="justify-content: center;align-items:center;">Create new Book</button>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Publish Date</th>
+                <th>Title</th>
+                <th>Page Count</th>
+            </tr>
+        </thead>
+        <!-- Implement Details as DoubleClick-->
+        <tbody>
+            @foreach (var book in FilteredBooks)
+            {
+                <tr>
+                    <td>@book.id</td>
+                    <td>
+                        @book.publishDate.ToShortDateString()
+                    </td>
+                    <td>@book.title</td>
+                    <td>@book.pageCount </td>
+                    <td>
+                        <button type="button" class="btn btn-info" @onclick="() => OpenUpdateForm(book)">Update</button>
+                        <button type="button" class="btn btn-danger" @onclick="() => OpenDeleteDialog(book)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+@if (ShowDeleteDialog)
+{
+    <BooksFrontEnd.Modals.DesicionDialog DialogType="DesicionDialog.ModalDialogType.DeleteCancel" Title="Warning" Text="Are you sure you want to delete this book?" OnClose="CloseDeleteDialog"></BooksFrontEnd.Modals.DesicionDialog>
+}
+
+@if (ShowSucessDialog)
+{
+    <BooksFrontEnd.Modals.DesicionDialog DialogType="DesicionDialog.ModalDialogType.Ok" Title="Sucess" Text="Action Sucessfully Completed" OnClose="CloseSucessDialog"></BooksFrontEnd.Modals.DesicionDialog>
+
+}
+
+@code {
+    private IEnumerable<Book> books;
+    private Book _currentBook;
+    protected override async Task OnInitializedAsync()
+    {
+        books = await BookService.GetAll();
+    }
+
+    public bool ShowUpdateForm { get; set; }
+
+    public bool ShowCreateForm { get; set; }
+
+    public bool ShowDeleteDialog { get; set; }
+
+    public bool ShowSucessDialog { get; set; }
+
+    public string SearchValue { get; set; } = "";
+
+    public void OpenCreateForm()
+    {
+        _currentBook = new Book();
+        ShowCreateForm = true;
+        StateHasChanged();
+    }
+
+    public void CloseCreateForm()
+    {
+        ShowCreateForm = false;
+        StateHasChanged();
+    }
+
+    private void CloseUpdateForm()
+    {
+        ShowUpdateForm = false;
+        StateHasChanged();
+    }
+
+    private void OpenUpdateForm(Book book)
+    {
+        _currentBook = book;
+        ShowUpdateForm = true;
+        StateHasChanged();
+    }
+
+    private void OpenSucessDialog()
+    {
+        ShowSucessDialog = true;
+        StateHasChanged();
+    }
+
+    private void CloseSucessDialog()
+    {
+        ShowSucessDialog = false;
+        StateHasChanged();
+    }
+
+    IEnumerable<Book> FilteredBooks => books.Where(x => x.id.ToString().Contains(SearchValue));
+
+    private async void CloseDeleteDialog(bool accepted)
+    {
+        if (accepted)
+        {
+            await BookService.Delete(_currentBook.id);
+            OpenSucessDialog();
+        }
+
+        ShowDeleteDialog = false;
+        _currentBook = null;
+        StateHasChanged();
+    }
+
+    private void OpenDeleteDialog(Book book)
+    {
+        _currentBook = book;
+        ShowDeleteDialog = true;
+        StateHasChanged();
+    }
+
+}
