@@ -15,82 +15,84 @@
 
 <p>This component demonstrates fetching data from a service.</p>
 
-
-@if (ShowUpdateForm || ShowCreateForm )
+@if (ShowUpdateForm || ShowCreateForm)
 {
-<form>
-    <table class="form-group">
-        <tr>
-            <td>
-                <label for="Name" class="control-label">Title</label>
-            </td>
-            <td>
-                <input type="text" class="form-control" @bind-value="@_currentBook.title" />
-            </td>
-            <td width="20"> </td>
-            <td>
-                <label for="Name" class="control-label">Description</label>
-            </td>
-            <td>
-                <input type="text" class="form-control" @bind-value="@_currentBook.description" />
-            </td>
-        </tr>
-        <tr>
+    <form>
+        <table class="form-group">
+            <tr>
+                <td>
+                    <label for="Name" class="control-label">Title</label>
+                </td>
+                <td>
+                    <input type="text" class="form-control" @bind-value="@_currentBook.title" />
+                </td>
+                <td width="20"> </td>
+                <td>
+                    <label for="Name" class="control-label">Description</label>
+                </td>
+                <td>
+                    <input type="text" class="form-control" @bind-value="@_currentBook.description" />
+                </td>
+            </tr>
+            <tr>
 
-            <td>
-                <label for="Department" class="control-label">Page Count</label>
-            </td>
-            <td>
-                <input type="text" class="form-control" @bind-value="@_currentBook.pageCount" />
-            </td>
-            <td width="20"> </td>
-            <td>
-                <label for="Department" class="control-label">Excerpt</label>
-            </td>
-            <td>
-                <input type="text" class="form-control" @bind-value="@_currentBook.excerpt" />
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <label for="Department" class="control-label">Publish Date</label>
-            </td>
-            <td>
-                <input type="date" class="form-control" @bind-value="@_currentBook.publishDate" />
-            </td>
-        </tr>
-        <tr>
-            <td>
-                @if (ShowUpdateForm)
-                {
-                    <input type="submit" class="btn btn-success" @onclick="async () => await BookService.Update(_currentBook.id,_currentBook)" style="width:220px;" value="Save" />
+                <td>
+                    <label for="Department" class="control-label">Page Count</label>
+                </td>
+                <td>
+                    <input type="text" class="form-control" @bind-value="@_currentBook.pageCount" />
+                </td>
+                <td width="20"> </td>
+                <td>
+                    <label for="Department" class="control-label">Excerpt</label>
+                </td>
+                <td>
+                    <input type="text" class="form-control" @bind-value="@_currentBook.excerpt" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="Department" class="control-label">Publish Date</label>
+                </td>
+                <td>
+                    <input type="date" class="form-control" @bind-value="@_currentBook.publishDate" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    @if (ShowUpdateForm)
+                    {
+                        <input type="submit" class="btn btn-success" @onclick="async () => await BookService.Update(_currentBook.id,_currentBook)" style="width:220px;" value="Save" />
 
-                }
-                else
-                {
-                    <input type="submit" class="btn btn-success" @onclick="async () => await BookService.Add(_currentBook)" style="width:220px;" value="Save" />
+                    }
+                    else
+                    {
+                        <input type="submit" class="btn btn-success" @onclick="async () => await BookService.Add(_currentBook)" style="width:220px;" value="Save" />
 
-                }
-            </td>
-            <td></td>
-            <td width="20"> </td>
-            <td>
-                <input type="submit" class="btn btn-danger" @onclick="CloseUpdateForm" style="width:220px;" value="Cancel" />
-            </td>
-        </tr>
-    </table>
-</form>
+                    }
+                </td>
+                <td></td>
+                <td width="20"> </td>
+                <td>
+                    <input type="submit" class="btn btn-danger" @onclick="CloseUpdateForm" style="width:220px;" value="Cancel" />
+                </td>
+            </tr>
+        </table>
+    </form>
 }
-<button type="button" class="btn btn-success" @onclick="OpenCreateForm" style="justify-content: center;align-items:center;">Create new Book</button>
 @if (books == null)
 {
     <p><em>Loading...</em></p>
 }
-else
+else if (!ShowUpdateForm && !ShowCreateForm)
 {
+    <input @bind-value="@SearchValue" @bind-value:event="oninput" />
+    <button type="button" class="btn btn-success" @onclick="OpenCreateForm" style="justify-content: center;align-items:center;">Create new Book</button>
+
     <table class="table">
         <thead>
             <tr>
+                <th>Id</th>
                 <th>Publish Date</th>
                 <th>Title</th>
                 <th>Page Count</th>
@@ -98,9 +100,10 @@ else
         </thead>
         <!-- Implement Details as DoubleClick-->
         <tbody>
-            @foreach (var book in books)
+            @foreach (var book in FilteredBooks)
             {
                 <tr>
+                    <td>@book.id</td>
                     <td>
                         @book.publishDate.ToShortDateString()
                     </td>
@@ -133,6 +136,7 @@ else
     {
         books = await BookService.GetAll();
     }
+
     public bool ShowUpdateForm { get; set; }
 
     public bool ShowCreateForm { get; set; }
@@ -140,6 +144,8 @@ else
     public bool ShowDeleteDialog { get; set; }
 
     public bool ShowSucessDialog { get; set; }
+
+    public string SearchValue { get; set; } = "";
 
     public void OpenCreateForm()
     {
@@ -179,6 +185,7 @@ else
         StateHasChanged();
     }
 
+    IEnumerable<Book> FilteredBooks => books.Where(x => x.id.ToString().Contains(SearchValue));
 
     private async void CloseDeleteDialog(bool accepted)
     {
